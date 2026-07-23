@@ -95,14 +95,43 @@
     .contract code { display: block; overflow-wrap: anywhere; margin-top: 7px; color: #7ee8ff; font-size: 15px; }
     .contract a { color: #9edbff; font-weight: 700; }
     .boundary { margin: 30px 0 0 160px; padding: 22px 24px; border-left: 4px solid #f0a000; background: #fff9ed; color: #5f4710; border-radius: 0 14px 14px 0; }
+    .dapp-verifier { margin: 30px 0 0 160px; padding: 28px; background: #ffffff; border: 1px solid #cfe0ff; border-radius: 18px; box-shadow: 0 10px 28px rgba(23, 45, 82, .06); }
+    .dapp-intro { margin: 0 0 20px; color: #3d495f; }
+    .dapp-file-label { display: block; margin-bottom: 8px; color: var(--ink); font-weight: 800; }
+    .dapp-file-input { width: 100%; padding: 10px; color: var(--ink); border: 1px solid #bdcadc; border-radius: 10px; background: #f8fbff; font: inherit; }
+    .dapp-file-input::file-selector-button { margin-right: 10px; padding: 8px 11px; border: 0; border-radius: 7px; color: #ffffff; background: var(--blue); font: inherit; font-weight: 750; cursor: pointer; }
+    .dapp-actions { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+    .dapp-verify-button { min-width: 220px; padding: 12px 18px; border: 0; border-radius: 10px; color: #ffffff; background: var(--blue); font: inherit; font-weight: 850; cursor: pointer; box-shadow: 0 8px 18px rgba(36, 87, 214, .2); }
+    .dapp-verify-button:hover:not(:disabled) { background: #1946b4; }
+    .dapp-verify-button:disabled { cursor: wait; opacity: .66; }
+    .dapp-selected-file { min-width: 0; overflow-wrap: anywhere; color: var(--muted); font-size: 14px; }
+    .dapp-notice { margin: 16px 0 0; color: #5d6c84; font-size: 14px; }
+    .dapp-status { min-height: 28px; margin: 16px 0 0; color: #33435d; font-weight: 700; }
+    .dapp-status.is-error { color: var(--red); }
+    .dapp-status.is-loading { color: var(--blue); }
+    .dapp-result { margin-top: 18px; padding: 21px; border: 1px solid var(--line); border-radius: 14px; }
+    .dapp-result.is-pass { border-color: #a8e7d5; background: #f3fffb; }
+    .dapp-result.is-fail { border-color: #ffd0d0; background: #fff8f8; }
+    .dapp-result-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .dapp-result-title { font-size: 20px; font-weight: 900; }
+    .dapp-result-copy { margin: 0 0 15px; color: #3d495f; }
+    .dapp-details { display: grid; gap: 9px; margin: 0; }
+    .dapp-detail { display: grid; grid-template-columns: 148px minmax(0, 1fr); gap: 10px; padding-top: 9px; border-top: 1px solid rgba(84, 96, 119, .16); }
+    .dapp-detail dt { color: var(--muted); font-weight: 750; }
+    .dapp-detail dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }
+    .dapp-detail code { font-size: .9em; color: #153e96; }
+    .dapp-detail a { color: var(--blue); font-weight: 750; }
     .footer { padding: 34px 0 64px; color: var(--muted); font-size: 14px; }
     @media (max-width: 760px) {
       .hero { padding: 64px 0 58px; }
       .section-heading { grid-template-columns: 1fr; gap: 10px; }
-      .body-copy, .grid-2, .flow, .proofs, .tech-list, .contract, .boundary { margin-left: 0; }
+      .body-copy, .grid-2, .flow, .proofs, .tech-list, .contract, .boundary, .dapp-verifier { margin-left: 0; }
       .grid-2, .proofs, .tech-list { grid-template-columns: 1fr; }
       .flow { grid-template-columns: 1fr 1fr; }
       .flow-step::after { display: none; }
+      .dapp-actions { align-items: stretch; flex-direction: column; }
+      .dapp-verify-button { width: 100%; }
+      .dapp-detail { grid-template-columns: 1fr; gap: 2px; }
       figure img { height: auto; }
     }
   </style>
@@ -151,9 +180,31 @@
       </div>
     </section>
 
+    <section class="section" id="live-dapp">
+      <div class="section-heading">
+        <div class="section-num">03 · LIVE DAPP</div>
+        <div>
+          <h2>ライブ検証 / 在线验证</h2>
+          <p class="cn">GitHub Pages 上でも実際に動く、ウォレット不要の読み取り専用ファイル検証機能。<br>无需钱包、可直接在 GitHub Pages 使用的只读文件验证功能。</p>
+        </div>
+      </div>
+      <div class="dapp-verifier">
+        <p class="dapp-intro"><strong>Browser-side SHA-256 + Sepolia eth_call</strong><br>選択したファイルはブラウザ内でハッシュ化され、ファイル本体は送信されません。<br>所选文件仅在浏览器本地计算哈希，文件内容不会上传。</p>
+        <label class="dapp-file-label" for="verify-file">PDF または画像を選択 / 选择 PDF 或图片（最大 25 MB）</label>
+        <input id="verify-file" class="dapp-file-input" type="file" accept="application/pdf,image/*" />
+        <div class="dapp-actions">
+          <button id="verify-button" class="dapp-verify-button" type="button">Sepolia で検証 / 在 Sepolia 验证</button>
+          <span id="selected-file" class="dapp-selected-file">ファイル未選択 / 尚未选择文件</span>
+        </div>
+        <p class="dapp-notice">ブラウザから公開 Sepolia RPC へ送信されるのは SHA-256 を含む読み取り専用の照会だけです。ウォレット接続・署名・Gas は不要です。<br>浏览器仅向公开 Sepolia RPC 发送包含 SHA-256 的只读查询；不连接钱包、不签名、不消耗 Gas。</p>
+        <p id="verify-status" class="dapp-status" role="status" aria-live="polite">ファイルを選択して検証を開始できます。/ 选择文件后即可开始验证。</p>
+        <div id="verify-result" class="dapp-result" hidden aria-live="polite"></div>
+      </div>
+    </section>
+
     <section class="section">
       <div class="section-heading">
-        <div class="section-num">03 · PROOF</div>
+        <div class="section-num">04 · PROOF</div>
         <div>
           <h2>検証デモ / 验证演示</h2>
           <p class="cn">同一文件会得到已登记结果；哪怕文件名相似、只改动一个字节，哈希也不同，因而会显示未登记。</p>
@@ -181,7 +232,7 @@
 
     <section class="section">
       <div class="section-heading">
-        <div class="section-num">04 · BUILD</div>
+        <div class="section-num">05 · BUILD</div>
         <div>
           <h2>担当した技術 / 技术实现</h2>
           <p class="cn">从合约到 FastAPI 验证接口、再到用户可理解的结果页面，完成了完整的 Web3 小型产品链路。</p>
@@ -204,7 +255,7 @@
 
     <section class="section">
       <div class="section-heading">
-        <div class="section-num">05 · BOUNDARY</div>
+        <div class="section-num">06 · BOUNDARY</div>
         <div>
           <h2>技術的・法的な境界 / 技术与法律边界</h2>
           <p class="cn">作品集里必须说明“技术能证明什么、不能证明什么”，这是可信 Web3 产品的一部分。</p>
@@ -215,5 +266,276 @@
   </main>
 
   <footer class="shell footer">Tudun AI × ChainProof · Web3 Portfolio Case Study · Sepolia Testnet</footer>
+  <script>
+    (() => {
+      const CONFIG = Object.freeze({
+        contractAddress: "0x0f4EDc46Ed426E893b01A75898859095cf7c1aEA",
+        chainId: 11155111,
+        networkName: "Sepolia",
+        rpcUrl: "https://ethereum-sepolia-rpc.publicnode.com",
+        etherscanUrl: "https://sepolia.etherscan.io/address/0x0f4EDc46Ed426E893b01A75898859095cf7c1aEA",
+        isRegisteredSelector: "0x27258b22",
+        getProofSelector: "0x1b80bb3a",
+        maxFileBytes: 25 * 1024 * 1024,
+        timeoutMs: 18000
+      });
+
+      const fileInput = document.getElementById("verify-file");
+      const verifyButton = document.getElementById("verify-button");
+      const selectedFile = document.getElementById("selected-file");
+      const status = document.getElementById("verify-status");
+      const result = document.getElementById("verify-result");
+      const defaultButtonLabel = verifyButton.textContent;
+
+      function setStatus(message, state = "") {
+        status.textContent = message;
+        status.className = `dapp-status ${state}`.trim();
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+      }
+
+      function isAllowedFile(file) {
+        return file.type === "application/pdf" || file.type.startsWith("image/");
+      }
+
+      function hashToHex(buffer) {
+        return "0x" + Array.from(new Uint8Array(buffer))
+          .map((byte) => byte.toString(16).padStart(2, "0"))
+          .join("")
+          .toUpperCase();
+      }
+
+      function encodeBytes32Call(selector, hash) {
+        return selector + hash.slice(2).toLowerCase();
+      }
+
+      async function rpcEthCall(data, id) {
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), CONFIG.timeoutMs);
+        try {
+          const response = await fetch(CONFIG.rpcUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              id,
+              method: "eth_call",
+              params: [{ to: CONFIG.contractAddress, data }, "latest"]
+            }),
+            signal: controller.signal
+          });
+          if (!response.ok) throw new Error("RPC HTTP error");
+          const payload = await response.json();
+          if (payload.error || typeof payload.result !== "string" || !payload.result.startsWith("0x")) {
+            throw new Error("RPC response error");
+          }
+          return payload.result;
+        } finally {
+          window.clearTimeout(timeout);
+        }
+      }
+
+      function hexToBytes(hex) {
+        if (hex.length % 2 !== 0) throw new Error("Invalid ABI hex");
+        const bytes = new Uint8Array(hex.length / 2);
+        for (let index = 0; index < bytes.length; index += 1) {
+          bytes[index] = Number.parseInt(hex.slice(index * 2, index * 2 + 2), 16);
+        }
+        return bytes;
+      }
+
+      function decodeProof(encoded) {
+        const hex = encoded.startsWith("0x") ? encoded.slice(2) : "";
+        if (hex.length < 256 || hex.length % 64 !== 0) throw new Error("Invalid getProof response");
+
+        const wordAt = (byteOffset) => {
+          const word = hex.slice(byteOffset * 2, byteOffset * 2 + 64);
+          if (word.length !== 64) throw new Error("Invalid ABI word");
+          return word;
+        };
+        const issuer = "0x" + wordAt(0).slice(24);
+        const registeredAt = Number(BigInt("0x" + wordAt(32)));
+        const textOffset = Number(BigInt("0x" + wordAt(64)));
+        const textLength = Number(BigInt("0x" + wordAt(textOffset)));
+        const textStart = (textOffset + 32) * 2;
+        const textEnd = textStart + textLength * 2;
+        if (!Number.isSafeInteger(registeredAt) || textEnd > hex.length) throw new Error("Invalid proof payload");
+
+        return {
+          issuer,
+          registeredAt,
+          artifactType: new TextDecoder().decode(hexToBytes(hex.slice(textStart, textEnd)))
+        };
+      }
+
+      function formatJst(unixSeconds) {
+        const parts = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Asia/Tokyo",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false
+        }).formatToParts(new Date(unixSeconds * 1000));
+        const values = Object.fromEntries(
+          parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value])
+        );
+        return `${values.year}-${values.month}-${values.day} ${values.hour}:${values.minute}:${values.second} JST`;
+      }
+
+      function appendDetail(list, label, value, options = {}) {
+        const row = document.createElement("div");
+        row.className = "dapp-detail";
+        const labelNode = document.createElement("dt");
+        labelNode.textContent = label;
+        const valueNode = document.createElement("dd");
+
+        if (options.href) {
+          const link = document.createElement("a");
+          link.href = options.href;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = value;
+          valueNode.append(link);
+        } else if (options.code) {
+          const code = document.createElement("code");
+          code.textContent = value;
+          valueNode.append(code);
+        } else {
+          valueNode.textContent = value;
+        }
+        row.append(labelNode, valueNode);
+        list.append(row);
+      }
+
+      function renderResult(data) {
+        const registered = data.registered;
+        result.hidden = false;
+        result.className = `dapp-result ${registered ? "is-pass" : "is-fail"}`;
+        result.replaceChildren();
+
+        const heading = document.createElement("div");
+        heading.className = "dapp-result-heading";
+        const badge = document.createElement("span");
+        badge.className = `result ${registered ? "pass" : "fail"}`;
+        badge.textContent = registered ? "PASS · Registered" : "FAIL · Not registered";
+        const title = document.createElement("span");
+        title.className = "dapp-result-title";
+        title.textContent = registered
+          ? "オンチェーン検証：登録済み / 链上验证：已登记"
+          : "オンチェーン検証：未登録 / 链上验证：未登记";
+        heading.append(badge, title);
+
+        const copy = document.createElement("p");
+        copy.className = "dapp-result-copy";
+        copy.textContent = registered
+          ? "この SHA-256 は ChainProofRegistry の登録記録と一致しました。/ 当前 SHA-256 与 ChainProofRegistry 的登记记录一致。"
+          : "この SHA-256 は、この ChainProofRegistry では見つかりませんでした。/ 当前 SHA-256 未在该 ChainProofRegistry 中找到。";
+
+        const details = document.createElement("dl");
+        details.className = "dapp-details";
+        appendDetail(details, "ファイル名 / 文件名", data.fileName);
+        appendDetail(details, "SHA-256", data.hash, { code: true });
+        appendDetail(details, "ネットワーク / 网络", `${CONFIG.networkName} (Chain ID: ${CONFIG.chainId})`);
+        appendDetail(details, "合約 / 合约", CONFIG.contractAddress, { href: CONFIG.etherscanUrl });
+        if (registered) {
+          appendDetail(details, "登録ウォレット / 登记钱包", data.issuer, { code: true });
+          appendDetail(details, "登録時刻 / 登记时间", formatJst(data.registeredAt));
+          appendDetail(details, "タイプ / 登记类型", data.artifactType || "—");
+        }
+        result.append(heading, copy, details);
+      }
+
+      function clearResult() {
+        result.hidden = true;
+        result.className = "dapp-result";
+        result.replaceChildren();
+      }
+
+      async function verifySelectedFile() {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) {
+          setStatus("先にファイルを選択してください。/ 请先选择文件。", "is-error");
+          return;
+        }
+        if (!isAllowedFile(file)) {
+          setStatus("PDF または画像ファイルのみ検証できます。/ 仅可验证 PDF 或图片文件。", "is-error");
+          return;
+        }
+        if (file.size === 0 || file.size > CONFIG.maxFileBytes) {
+          setStatus("ファイルは 1 byte 以上、25 MB 以下にしてください。/ 文件须大于 1 byte 且不超过 25 MB。", "is-error");
+          return;
+        }
+        if (!globalThis.crypto || !globalThis.crypto.subtle) {
+          setStatus("このブラウザでは Web Crypto API を利用できません。HTTPS の対応ブラウザで開いてください。/ 当前浏览器无法使用 Web Crypto API，请使用支持 HTTPS 的浏览器。", "is-error");
+          return;
+        }
+
+        clearResult();
+        verifyButton.disabled = true;
+        verifyButton.textContent = "SHA-256 を計算中… / 正在计算 SHA-256…";
+        setStatus("ファイルはブラウザ内で処理されています。/ 文件正在浏览器本地处理。", "is-loading");
+
+        try {
+          const fileBytes = await file.arrayBuffer();
+          const digest = await globalThis.crypto.subtle.digest("SHA-256", fileBytes);
+          const hash = hashToHex(digest);
+
+          verifyButton.textContent = "Sepolia を照会中… / 正在查询 Sepolia…";
+          setStatus("SHA-256 のみを使って読み取り専用 eth_call を実行中です。/ 正在仅凭 SHA-256 执行只读 eth_call。", "is-loading");
+          const isRegisteredData = await rpcEthCall(
+            encodeBytes32Call(CONFIG.isRegisteredSelector, hash),
+            1
+          );
+          const registered = BigInt(isRegisteredData) !== 0n;
+
+          if (!registered) {
+            renderResult({ fileName: file.name, hash, registered: false });
+            setStatus("検証が完了しました。/ 验证完成。", "");
+            return;
+          }
+
+          const proofData = await rpcEthCall(
+            encodeBytes32Call(CONFIG.getProofSelector, hash),
+            2
+          );
+          const proof = decodeProof(proofData);
+          renderResult({ fileName: file.name, hash, registered: true, ...proof });
+          setStatus("オンチェーン登録を確認しました。/ 已确认链上登记。", "");
+        } catch (error) {
+          const timeout = error && error.name === "AbortError";
+          setStatus(
+            timeout
+              ? "Sepolia RPC の応答がタイムアウトしました。少し待ってから再試行してください。/ Sepolia RPC 响应超时，请稍后重试。"
+              : "Sepolia の読み取り専用照会に失敗しました。ネットワークを確認して再試行してください。/ Sepolia 只读查询失败，请检查网络后重试。",
+            "is-error"
+          );
+        } finally {
+          verifyButton.disabled = false;
+          verifyButton.textContent = defaultButtonLabel;
+        }
+      }
+
+      fileInput.addEventListener("change", () => {
+        clearResult();
+        const file = fileInput.files && fileInput.files[0];
+        selectedFile.textContent = file
+          ? `${file.name} (${formatFileSize(file.size)})`
+          : "ファイル未選択 / 尚未选择文件";
+        setStatus(
+          file
+            ? "検証ボタンを押すと、ブラウザ内で SHA-256 を計算します。/ 点击验证后，浏览器将在本地计算 SHA-256。"
+            : "ファイルを選択して検証を開始できます。/ 选择文件后即可开始验证。"
+        );
+      });
+
+      verifyButton.addEventListener("click", verifySelectedFile);
+    })();
+  </script>
 </body>
 </html>
