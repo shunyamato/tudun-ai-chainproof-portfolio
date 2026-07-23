@@ -144,6 +144,26 @@
     .register-result { margin-top: 18px; padding: 21px; color: var(--ink); border: 1px solid #b8d4ee; border-radius: 14px; background: #ffffff; }
     .register-result.is-pass { border-color: #a8e7d5; background: #f3fffb; }
     .register-result.is-pending { border-color: #ffe0a0; background: #fffaf0; }
+    .history-kicker { display: inline-block; margin-bottom: 10px; padding: 4px 9px; border: 1px solid #b9d4f4; border-radius: 999px; color: var(--blue); font-size: 12px; font-weight: 850; letter-spacing: .08em; }
+    .dapp-history { padding: 28px; border: 1px solid #b9d4f4; border-radius: 18px; background: #f8fbff; }
+    .dapp-history h3 { margin-bottom: 8px; }
+    .dapp-history-copy { margin: 0; color: #3d495f; }
+    .history-actions { display: flex; align-items: center; gap: 14px; margin-top: 18px; }
+    .history-refresh-button { min-width: 214px; padding: 11px 16px; border: 0; border-radius: 10px; color: #ffffff; background: #163f8c; font: inherit; font-weight: 850; cursor: pointer; box-shadow: 0 8px 18px rgba(22, 63, 140, .18); }
+    .history-refresh-button:hover:not(:disabled) { background: #0e2c67; }
+    .history-refresh-button:disabled { cursor: wait; opacity: .66; }
+    .history-count { color: #40516d; font-size: 14px; font-weight: 750; }
+    .history-note { margin: 15px 0 0; color: #5d6c84; font-size: 14px; }
+    .history-status { min-height: 26px; margin: 15px 0 0; color: #33435d; font-weight: 750; }
+    .history-status.is-loading { color: var(--blue); }
+    .history-status.is-error { color: var(--red); }
+    .history-status.is-success { color: var(--green); }
+    .history-list { display: grid; gap: 12px; margin-top: 14px; }
+    .history-card { padding: 16px; border: 1px solid #d6e2f1; border-radius: 12px; background: #ffffff; }
+    .history-card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; margin-bottom: 10px; }
+    .history-card-title { color: #163f8c; font-size: 16px; font-weight: 900; }
+    .history-card-time { color: #5d6c84; font-size: 13px; }
+    .history-empty { padding: 15px; color: #5d6c84; border: 1px dashed #b9d4f4; border-radius: 10px; background: #ffffff; }
     .footer { padding: 34px 0 64px; color: var(--muted); font-size: 14px; }
     @media (max-width: 760px) {
       .hero { padding: 64px 0 58px; }
@@ -152,8 +172,8 @@
       .grid-2, .proofs, .tech-list { grid-template-columns: 1fr; }
       .flow { grid-template-columns: 1fr 1fr; }
       .flow-step::after { display: none; }
-      .dapp-actions, .register-actions { align-items: stretch; flex-direction: column; }
-      .dapp-verify-button, .register-button { width: 100%; }
+      .dapp-actions, .register-actions, .history-actions { align-items: stretch; flex-direction: column; }
+      .dapp-verify-button, .register-button, .history-refresh-button { width: 100%; }
       .dapp-detail { grid-template-columns: 1fr; gap: 2px; }
       figure img { height: auto; }
     }
@@ -238,6 +258,19 @@
           <p class="registration-note"><strong>重要 / 重要：</strong> 登録時のみ MetaMask が開き、Sepolia のテスト ETH を使う取引になります。ファイル本体は送信しませんが、SHA-256・登録タイプ・ウォレットアドレスは公開テストネットに記録されます。<br>仅登记时会打开 MetaMask 并消耗少量 Sepolia 测试 ETH。文件内容不会上传，但 SHA-256、登记类型和钱包地址会写入公开测试网。</p>
           <p id="register-status" class="registration-status" role="status" aria-live="polite">ファイルを選択後、MetaMask を使って登録できます。/ 选择文件后，即可通过 MetaMask 登记。</p>
           <div id="register-result" class="register-result" hidden aria-live="polite"></div>
+        </div>
+        <div class="dapp-divider" aria-hidden="true"></div>
+        <div class="dapp-history" id="onchain-history">
+          <span class="history-kicker">PUBLIC EVENT LOGS · READ ONLY</span>
+          <h3>オンチェーン登録記録 / 链上登记记录</h3>
+          <p class="dapp-history-copy">この ChainProofRegistry が発行した <code>ProofRegistered</code> イベントを、公開 Sepolia RPC から読み取ります。<br>从公开 Sepolia RPC 读取此 ChainProofRegistry 发出的 <code>ProofRegistered</code> 事件。</p>
+          <div class="history-actions">
+            <button id="history-refresh-button" class="history-refresh-button" type="button">記録を更新 / 刷新登记记录</button>
+            <span id="history-count" class="history-count">読み込み待ち / 等待读取</span>
+          </div>
+          <p class="history-note">ファイル名とファイル本体はチェーンに保存されません。ここには SHA-256・登録タイプ・ウォレット・時刻・取引だけを表示します。<br>文件名和文件本体不会写入链上；此处只显示 SHA-256、登记类型、钱包、时间和交易。</p>
+          <p id="history-status" class="history-status" role="status" aria-live="polite">公開イベント記録を読み込みます。/ 正在读取公开事件记录。</p>
+          <div id="history-list" class="history-list" aria-live="polite"></div>
         </div>
       </div>
     </section>
@@ -990,6 +1023,7 @@
             artifactType: proof.artifactType
           });
           setRegistrationStatus("オンチェーン登録が確認されました。/ 已确认链上登记。", "is-success");
+          window.dispatchEvent(new CustomEvent("chainproof:registered"));
         } catch (error) {
           setRegistrationStatus(registrationErrorMessage(error), "is-error");
         } finally {
@@ -1012,6 +1046,227 @@
       });
 
       registerButton.addEventListener("click", registerSelectedFile);
+    })();
+  </script>
+  <script>
+    (() => {
+      const CONFIG = Object.freeze({
+        contractAddress: "0x0f4EDc46Ed426E893b01A75898859095cf7c1aEA",
+        chainId: 11155111,
+        logsRpcUrl: "https://sepolia.drpc.org",
+        eventFromBlock: "0xace330",
+        proofRegisteredTopic: "0x857bf7f0da8d8d88c34666667ac9e4d49c2c36643ad32be7a9ed914138c266ba",
+        maxRows: 12,
+        timeoutMs: 18000
+      });
+
+      const refreshButton = document.getElementById("history-refresh-button");
+      const count = document.getElementById("history-count");
+      const status = document.getElementById("history-status");
+      const list = document.getElementById("history-list");
+      const defaultButtonLabel = refreshButton.textContent;
+
+      function setHistoryStatus(message, state) {
+        status.textContent = message;
+        status.className = "history-status" + (state ? " " + state : "");
+      }
+
+      function hexToBytes(hex) {
+        if (hex.length % 2 !== 0) throw new Error("Invalid event hex");
+        const bytes = new Uint8Array(hex.length / 2);
+        for (let index = 0; index < bytes.length; index += 1) {
+          bytes[index] = Number.parseInt(hex.slice(index * 2, index * 2 + 2), 16);
+        }
+        return bytes;
+      }
+
+      function decodeProofRegisteredData(data) {
+        const hex = typeof data === "string" && data.startsWith("0x") ? data.slice(2) : "";
+        if (hex.length < 128 || hex.length % 64 !== 0) throw new Error("Invalid ProofRegistered data");
+
+        function wordAtByte(byteOffset) {
+          const start = byteOffset * 2;
+          const word = hex.slice(start, start + 64);
+          if (word.length !== 64) throw new Error("Invalid ProofRegistered word");
+          return word;
+        }
+
+        const registeredAt = Number(BigInt("0x" + wordAtByte(0)));
+        const textOffset = Number(BigInt("0x" + wordAtByte(32)));
+        const textLength = Number(BigInt("0x" + wordAtByte(textOffset)));
+        const textStart = (textOffset + 32) * 2;
+        const textEnd = textStart + textLength * 2;
+        if (!Number.isSafeInteger(registeredAt) || !Number.isSafeInteger(textOffset) || !Number.isSafeInteger(textLength) || textOffset < 64 || textEnd > hex.length) {
+          throw new Error("Invalid ProofRegistered payload");
+        }
+
+        return {
+          registeredAt,
+          artifactType: new TextDecoder().decode(hexToBytes(hex.slice(textStart, textEnd)))
+        };
+      }
+
+      function formatJst(unixSeconds) {
+        const parts = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Asia/Tokyo",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false
+        }).formatToParts(new Date(unixSeconds * 1000));
+        const values = Object.fromEntries(
+          parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value])
+        );
+        return values.year + "-" + values.month + "-" + values.day + " " + values.hour + ":" + values.minute + ":" + values.second + " JST";
+      }
+
+      function appendDetail(details, label, value, options) {
+        const row = document.createElement("div");
+        row.className = "dapp-detail";
+        const labelNode = document.createElement("dt");
+        labelNode.textContent = label;
+        const valueNode = document.createElement("dd");
+
+        if (options && options.href) {
+          const link = document.createElement("a");
+          link.href = options.href;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = value;
+          valueNode.append(link);
+        } else if (options && options.code) {
+          const code = document.createElement("code");
+          code.textContent = value;
+          valueNode.append(code);
+        } else {
+          valueNode.textContent = value;
+        }
+
+        row.append(labelNode, valueNode);
+        details.append(row);
+      }
+
+      function shorten(value, start, end) {
+        if (value.length <= start + end + 1) return value;
+        return value.slice(0, start) + "…" + value.slice(-end);
+      }
+
+      function recordFromLog(log) {
+        if (!log || !Array.isArray(log.topics) || log.topics.length < 3) throw new Error("Invalid event topics");
+        const event = decodeProofRegisteredData(log.data);
+        const hash = "0x" + log.topics[1].slice(2).toUpperCase();
+        const issuer = "0x" + log.topics[2].slice(-40);
+        const blockNumber = Number(BigInt(log.blockNumber));
+        if (!/^[0-9a-fA-F]{64}$/.test(hash.slice(2)) || !/^0x[0-9a-fA-F]{40}$/.test(issuer) || !Number.isSafeInteger(blockNumber)) {
+          throw new Error("Invalid event fields");
+        }
+        return {
+          hash,
+          issuer,
+          registeredAt: event.registeredAt,
+          artifactType: event.artifactType,
+          transactionHash: log.transactionHash,
+          blockNumber
+        };
+      }
+
+      async function getProofRegisteredLogs() {
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), CONFIG.timeoutMs);
+        try {
+          const response = await fetch(CONFIG.logsRpcUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              id: 41,
+              method: "eth_getLogs",
+              params: [{
+                address: CONFIG.contractAddress,
+                fromBlock: CONFIG.eventFromBlock,
+                toBlock: "latest",
+                topics: [CONFIG.proofRegisteredTopic]
+              }]
+            }),
+            signal: controller.signal
+          });
+          if (!response.ok) throw new Error("Log RPC HTTP error");
+          const payload = await response.json();
+          if (payload.error || !Array.isArray(payload.result)) throw new Error("Log RPC response error");
+          return payload.result;
+        } finally {
+          window.clearTimeout(timeout);
+        }
+      }
+
+      function renderHistory(records) {
+        list.replaceChildren();
+        if (records.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "history-empty";
+          empty.textContent = "ProofRegistered イベントはまだ見つかりませんでした。/ 尚未找到 ProofRegistered 事件。";
+          list.append(empty);
+          return;
+        }
+
+        records.forEach((record) => {
+          const card = document.createElement("article");
+          card.className = "history-card";
+          const head = document.createElement("div");
+          head.className = "history-card-head";
+          const title = document.createElement("span");
+          title.className = "history-card-title";
+          title.textContent = "REGISTERED · " + shorten(record.hash, 10, 8);
+          const time = document.createElement("span");
+          time.className = "history-card-time";
+          time.textContent = formatJst(record.registeredAt);
+          head.append(title, time);
+
+          const details = document.createElement("dl");
+          details.className = "dapp-details";
+          appendDetail(details, "SHA-256", record.hash, { code: true });
+          appendDetail(details, "登録タイプ / 登记类型", record.artifactType);
+          appendDetail(details, "登録ウォレット / 登记钱包", record.issuer, { code: true });
+          appendDetail(details, "ブロック / 区块", String(record.blockNumber));
+          appendDetail(details, "トランザクション / 交易", shorten(record.transactionHash, 14, 10), {
+            href: "https://sepolia.etherscan.io/tx/" + record.transactionHash
+          });
+          card.append(head, details);
+          list.append(card);
+        });
+      }
+
+      async function loadHistory() {
+        refreshButton.disabled = true;
+        refreshButton.textContent = "イベントを読み込み中… / 正在读取事件…";
+        setHistoryStatus("公開 Sepolia の ProofRegistered イベントを読み込んでいます。/ 正在读取公开 Sepolia 的 ProofRegistered 事件。", "is-loading");
+
+        try {
+          const logs = await getProofRegisteredLogs();
+          const records = logs
+            .filter((log) => !log.removed)
+            .map(recordFromLog)
+            .sort((left, right) => right.registeredAt - left.registeredAt || right.blockNumber - left.blockNumber);
+          const shownRecords = records.slice(0, CONFIG.maxRows);
+          renderHistory(shownRecords);
+          count.textContent = records.length + " 件の記録 / " + records.length + " 条记录（最新 " + shownRecords.length + " 条）";
+          setHistoryStatus("オンチェーン登録記録を読み込みました。/ 已读取链上登记记录。", "is-success");
+        } catch (error) {
+          list.replaceChildren();
+          count.textContent = "読み込み失敗 / 读取失败";
+          setHistoryStatus("記録の読み込みに失敗しました。数秒後に更新を押してください。/ 读取登记记录失败，请稍后点击刷新。", "is-error");
+        } finally {
+          refreshButton.disabled = false;
+          refreshButton.textContent = defaultButtonLabel;
+        }
+      }
+
+      refreshButton.addEventListener("click", loadHistory);
+      window.addEventListener("chainproof:registered", loadHistory);
+      loadHistory();
     })();
   </script>
 </body>
