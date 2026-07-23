@@ -85,6 +85,7 @@
     .result { display: inline-block; padding: 4px 8px; border-radius: 7px; font-weight: 850; font-size: 14px; }
     .pass { color: var(--green); background: #e3f8f1; }
     .fail { color: var(--red); background: #fff0f0; }
+    .pending { color: #8b5c00; background: #fff0c5; }
     .caption-title { margin: 10px 0 2px; font-size: 18px; font-weight: 800; }
     .caption-copy { margin: 0; color: var(--muted); font-size: 14px; }
     .tech-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 30px 0 0 160px; }
@@ -121,6 +122,28 @@
     .dapp-detail dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }
     .dapp-detail code { font-size: .9em; color: #153e96; }
     .dapp-detail a { color: var(--blue); font-weight: 750; }
+    .dapp-divider { height: 1px; margin: 34px 0; background: #dce2eb; }
+    .register-kicker { display: inline-block; margin-bottom: 10px; padding: 4px 9px; border: 1px solid rgba(154, 219, 255, .45); border-radius: 999px; color: #9edbff; font-size: 12px; font-weight: 850; letter-spacing: .08em; }
+    .dapp-register { padding: 28px; color: #eaf2ff; background: linear-gradient(135deg, #0a1832, #123a65); border: 1px solid #2e6da5; border-radius: 18px; box-shadow: 0 10px 28px rgba(23, 45, 82, .12); }
+    .dapp-register h3 { color: #ffffff; }
+    .dapp-register-copy { margin: 8px 0 0; color: #d8e9ff; }
+    .dapp-register .dapp-file-label { margin-top: 22px; color: #ffffff; }
+    .dapp-register .dapp-file-input { color: #18304f; background: #f8fbff; }
+    .dapp-artifact-label { display: block; margin: 18px 0 8px; color: #ffffff; font-weight: 800; }
+    .dapp-artifact-input { width: 100%; padding: 11px; color: #18304f; border: 1px solid #b9d4f4; border-radius: 10px; background: #ffffff; font: inherit; }
+    .register-actions { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+    .register-button { min-width: 250px; padding: 12px 18px; border: 0; border-radius: 10px; color: #18210e; background: #d8f47b; font: inherit; font-weight: 900; cursor: pointer; box-shadow: 0 8px 18px rgba(0, 0, 0, .2); }
+    .register-button:hover:not(:disabled) { background: #c6e65a; }
+    .register-button:disabled { cursor: wait; opacity: .66; }
+    .registration-note { margin: 16px 0 0; color: #d8e9ff; font-size: 14px; }
+    .registration-note strong { color: #fff0a6; }
+    .registration-status { min-height: 28px; margin: 16px 0 0; color: #eaf2ff; font-weight: 750; }
+    .registration-status.is-error { color: #ffd3d3; }
+    .registration-status.is-loading { color: #9edbff; }
+    .registration-status.is-success { color: #a8f0d8; }
+    .register-result { margin-top: 18px; padding: 21px; color: var(--ink); border: 1px solid #b8d4ee; border-radius: 14px; background: #ffffff; }
+    .register-result.is-pass { border-color: #a8e7d5; background: #f3fffb; }
+    .register-result.is-pending { border-color: #ffe0a0; background: #fffaf0; }
     .footer { padding: 34px 0 64px; color: var(--muted); font-size: 14px; }
     @media (max-width: 760px) {
       .hero { padding: 64px 0 58px; }
@@ -129,8 +152,8 @@
       .grid-2, .proofs, .tech-list { grid-template-columns: 1fr; }
       .flow { grid-template-columns: 1fr 1fr; }
       .flow-step::after { display: none; }
-      .dapp-actions { align-items: stretch; flex-direction: column; }
-      .dapp-verify-button { width: 100%; }
+      .dapp-actions, .register-actions { align-items: stretch; flex-direction: column; }
+      .dapp-verify-button, .register-button { width: 100%; }
       .dapp-detail { grid-template-columns: 1fr; gap: 2px; }
       figure img { height: auto; }
     }
@@ -169,14 +192,14 @@
         <div class="section-num">02 · SOLUTION</div>
         <div>
           <h2>実装した仕組み / 已实现的方案</h2>
-          <p class="cn">图盾 AI 页面将文件在本地服务中计算 SHA-256；随后只读查询部署在 Sepolia 的 ChainProofRegistry 合约。</p>
+          <p class="cn">图盾 AI 在浏览器本地计算文件 SHA-256：任何人可只读验证；文件创建者也可经 MetaMask 主动登记到 Sepolia。</p>
         </div>
       </div>
       <div class="flow">
         <div class="flow-step"><span class="flow-label">STEP 01</span><strong>ファイル選択<br>选择文件</strong><small>PDF または画像 / PDF 或图片</small></div>
         <div class="flow-step"><span class="flow-label">STEP 02</span><strong>SHA-256 計算<br>计算哈希</strong><small>原文件不写入区块链</small></div>
-        <div class="flow-step"><span class="flow-label">STEP 03</span><strong>eth_call 照会<br>只读查询</strong><small>钱包、签名、Gas 都不需要</small></div>
-        <div class="flow-step"><span class="flow-label">STEP 04</span><strong>結果表示<br>显示结果</strong><small>登记钱包、时间、类型、合约</small></div>
+        <div class="flow-step"><span class="flow-label">STEP 03</span><strong>eth_call 検証<br>只读验证</strong><small>钱包、签名、Gas 都不需要</small></div>
+        <div class="flow-step"><span class="flow-label">STEP 04</span><strong>MetaMask 登録<br>通过 MetaMask 登记</strong><small>创建者确认交易后写入 Sepolia</small></div>
       </div>
     </section>
 
@@ -199,6 +222,23 @@
         <p class="dapp-notice">ブラウザから公開 Sepolia RPC へ送信されるのは SHA-256 を含む読み取り専用の照会だけです。ウォレット接続・署名・Gas は不要です。<br>浏览器仅向公开 Sepolia RPC 发送包含 SHA-256 的只读查询；不连接钱包、不签名、不消耗 Gas。</p>
         <p id="verify-status" class="dapp-status" role="status" aria-live="polite">ファイルを選択して検証を開始できます。/ 选择文件后即可开始验证。</p>
         <div id="verify-result" class="dapp-result" hidden aria-live="polite"></div>
+        <div class="dapp-divider" aria-hidden="true"></div>
+        <div class="dapp-register" id="live-registration">
+          <span class="register-kicker">CREATOR FLOW · METAMASK</span>
+          <h3>ファイルをオンチェーン登録 / 将文件登记到链上</h3>
+          <p class="dapp-register-copy">作成者が MetaMask で明示的に確認した場合のみ、SHA-256 とタイプを ChainProofRegistry に登録します。<br>只有文件创建者在 MetaMask 中明确确认后，才会把 SHA-256 与登记类型写入 ChainProofRegistry。</p>
+          <label class="dapp-file-label" for="register-file">登録する PDF または画像 / 选择要登记的 PDF 或图片（最大 25 MB）</label>
+          <input id="register-file" class="dapp-file-input" type="file" accept="application/pdf,image/*" />
+          <label class="dapp-artifact-label" for="register-artifact-type">登録タイプ / 登记类型（公開される文字列 / 会公开保存的文字）</label>
+          <input id="register-artifact-type" class="dapp-artifact-input" type="text" maxlength="120" value="Tudun AI file integrity proof" autocomplete="off" />
+          <div class="register-actions">
+            <button id="register-button" class="register-button" type="button">MetaMask で登録 / 通过 MetaMask 登记</button>
+            <span id="register-selected-file" class="dapp-selected-file">ファイル未選択 / 尚未选择文件</span>
+          </div>
+          <p class="registration-note"><strong>重要 / 重要：</strong> 登録時のみ MetaMask が開き、Sepolia のテスト ETH を使う取引になります。ファイル本体は送信しませんが、SHA-256・登録タイプ・ウォレットアドレスは公開テストネットに記録されます。<br>仅登记时会打开 MetaMask 并消耗少量 Sepolia 测试 ETH。文件内容不会上传，但 SHA-256、登记类型和钱包地址会写入公开测试网。</p>
+          <p id="register-status" class="registration-status" role="status" aria-live="polite">ファイルを選択後、MetaMask を使って登録できます。/ 选择文件后，即可通过 MetaMask 登记。</p>
+          <div id="register-result" class="register-result" hidden aria-live="polite"></div>
+        </div>
       </div>
     </section>
 
@@ -535,6 +575,443 @@
       });
 
       verifyButton.addEventListener("click", verifySelectedFile);
+    })();
+  </script>
+  <script>
+    (() => {
+      const CONFIG = Object.freeze({
+        contractAddress: "0x0f4EDc46Ed426E893b01A75898859095cf7c1aEA",
+        chainId: 11155111,
+        networkName: "Sepolia",
+        rpcUrl: "https://ethereum-sepolia-rpc.publicnode.com",
+        etherscanUrl: "https://sepolia.etherscan.io/address/0x0f4EDc46Ed426E893b01A75898859095cf7c1aEA",
+        isRegisteredSelector: "0x27258b22",
+        getProofSelector: "0x1b80bb3a",
+        registerProofSelector: "0x2a6fc70a",
+        maxFileBytes: 25 * 1024 * 1024,
+        timeoutMs: 18000,
+        confirmationTimeoutMs: 120000
+      });
+
+      const CHAIN_HEX = "0x" + CONFIG.chainId.toString(16);
+      const registerFileInput = document.getElementById("register-file");
+      const artifactInput = document.getElementById("register-artifact-type");
+      const registerButton = document.getElementById("register-button");
+      const selectedFile = document.getElementById("register-selected-file");
+      const status = document.getElementById("register-status");
+      const result = document.getElementById("register-result");
+      const defaultButtonLabel = registerButton.textContent;
+
+      function setRegistrationStatus(message, state) {
+        status.textContent = message;
+        status.className = "registration-status" + (state ? " " + state : "");
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes < 1024 * 1024) return String(Math.max(1, Math.round(bytes / 1024))) + " KB";
+        return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+      }
+
+      function isAllowedFile(file) {
+        return file.type === "application/pdf" || file.type.startsWith("image/") || /\.pdf$/i.test(file.name);
+      }
+
+      function hashToHex(buffer) {
+        return "0x" + Array.from(new Uint8Array(buffer))
+          .map((byte) => byte.toString(16).padStart(2, "0"))
+          .join("")
+          .toUpperCase();
+      }
+
+      function encodeBytes32Call(selector, hash) {
+        return selector + hash.slice(2).toLowerCase();
+      }
+
+      function encodeRegisterProofCall(hash, artifactType) {
+        const hashHex = hash.startsWith("0x") ? hash.slice(2) : hash;
+        if (!/^[0-9a-fA-F]{64}$/.test(hashHex)) throw new Error("Invalid SHA-256 hash");
+
+        const typeBytes = new TextEncoder().encode(artifactType);
+        const typeHex = Array.from(typeBytes)
+          .map((byte) => byte.toString(16).padStart(2, "0"))
+          .join("");
+        const lengthWord = typeBytes.length.toString(16).padStart(64, "0");
+        const paddedTypeHex = typeHex.padEnd(Math.ceil(typeHex.length / 64) * 64, "0");
+        const offsetWord = "40".padStart(64, "0");
+
+        return CONFIG.registerProofSelector + hashHex.toLowerCase() + offsetWord + lengthWord + paddedTypeHex;
+      }
+
+      async function rpcEthCall(data, id) {
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), CONFIG.timeoutMs);
+        try {
+          const response = await fetch(CONFIG.rpcUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              id,
+              method: "eth_call",
+              params: [{ to: CONFIG.contractAddress, data }, "latest"]
+            }),
+            signal: controller.signal
+          });
+          if (!response.ok) throw new Error("RPC HTTP error");
+          const payload = await response.json();
+          if (payload.error || typeof payload.result !== "string" || !payload.result.startsWith("0x")) {
+            throw new Error("RPC response error");
+          }
+          return payload.result;
+        } finally {
+          window.clearTimeout(timeout);
+        }
+      }
+
+      function hexToBytes(hex) {
+        if (hex.length % 2 !== 0) throw new Error("Invalid ABI hex");
+        const bytes = new Uint8Array(hex.length / 2);
+        for (let index = 0; index < bytes.length; index += 1) {
+          bytes[index] = Number.parseInt(hex.slice(index * 2, index * 2 + 2), 16);
+        }
+        return bytes;
+      }
+
+      function decodeProof(encoded) {
+        const hex = encoded.startsWith("0x") ? encoded.slice(2) : "";
+        if (hex.length < 256 || hex.length % 64 !== 0) throw new Error("Invalid getProof response");
+
+        function wordAt(byteOffset) {
+          const word = hex.slice(byteOffset * 2, byteOffset * 2 + 64);
+          if (word.length !== 64) throw new Error("Invalid ABI word");
+          return word;
+        }
+
+        const issuer = "0x" + wordAt(0).slice(24);
+        const registeredAt = Number(BigInt("0x" + wordAt(32)));
+        const textOffset = Number(BigInt("0x" + wordAt(64)));
+        const textLength = Number(BigInt("0x" + wordAt(textOffset)));
+        const textStart = (textOffset + 32) * 2;
+        const textEnd = textStart + textLength * 2;
+        if (!Number.isSafeInteger(registeredAt) || textEnd > hex.length) throw new Error("Invalid proof payload");
+
+        return {
+          issuer,
+          registeredAt,
+          artifactType: new TextDecoder().decode(hexToBytes(hex.slice(textStart, textEnd)))
+        };
+      }
+
+      function formatJst(unixSeconds) {
+        const parts = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Asia/Tokyo",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false
+        }).formatToParts(new Date(unixSeconds * 1000));
+        const values = Object.fromEntries(
+          parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value])
+        );
+        return values.year + "-" + values.month + "-" + values.day + " " + values.hour + ":" + values.minute + ":" + values.second + " JST";
+      }
+
+      function appendDetail(list, label, value, options) {
+        const row = document.createElement("div");
+        row.className = "dapp-detail";
+        const labelNode = document.createElement("dt");
+        labelNode.textContent = label;
+        const valueNode = document.createElement("dd");
+
+        if (options && options.href) {
+          const link = document.createElement("a");
+          link.href = options.href;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = value;
+          valueNode.append(link);
+        } else if (options && options.code) {
+          const code = document.createElement("code");
+          code.textContent = value;
+          valueNode.append(code);
+        } else {
+          valueNode.textContent = value;
+        }
+
+        row.append(labelNode, valueNode);
+        list.append(row);
+      }
+
+      function renderRegistrationResult(data) {
+        const isPending = data.state === "pending";
+        const isExisting = data.state === "existing";
+        result.hidden = false;
+        result.className = "register-result " + (isPending ? "is-pending" : "is-pass");
+        result.replaceChildren();
+
+        const heading = document.createElement("div");
+        heading.className = "dapp-result-heading";
+        const badge = document.createElement("span");
+        badge.className = "result " + (isPending ? "pending" : "pass");
+        badge.textContent = isPending
+          ? "PENDING · Submitted"
+          : (isExisting ? "ALREADY · Registered" : "PASS · Registered");
+        const title = document.createElement("span");
+        title.className = "dapp-result-title";
+        title.textContent = isPending
+          ? "登録取引を送信済み / 登记交易已发送"
+          : (isExisting
+            ? "すでに登録済み / 文件已经登记"
+            : "オンチェーン登録：確認済み / 链上登记：已确认");
+        heading.append(badge, title);
+
+        const copy = document.createElement("p");
+        copy.className = "dapp-result-copy";
+        copy.textContent = isPending
+          ? "Sepolia での確認待ちです。Etherscan の取引画面でも状態を確認できます。/ 正在等待 Sepolia 确认，也可在 Etherscan 查看交易状态。"
+          : (isExisting
+            ? "この SHA-256 はすでに登録されています。新しい取引は送信していません。/ 当前 SHA-256 已登记，未发送新的交易。"
+            : "MetaMask で承認した登録取引が Sepolia で確認されました。/ MetaMask 确认的登记交易已在 Sepolia 确认。");
+
+        const details = document.createElement("dl");
+        details.className = "dapp-details";
+        appendDetail(details, "ファイル名 / 文件名", data.fileName);
+        appendDetail(details, "SHA-256", data.hash, { code: true });
+        appendDetail(details, "ネットワーク / 网络", CONFIG.networkName + " (Chain ID: " + CONFIG.chainId + ")");
+        appendDetail(details, "合約 / 合约", CONFIG.contractAddress, { href: CONFIG.etherscanUrl });
+        if (data.account) appendDetail(details, "登録ウォレット / 登记钱包", data.account, { code: true });
+        if (data.txHash) {
+          appendDetail(
+            details,
+            "トランザクション / 交易",
+            data.txHash,
+            { href: "https://sepolia.etherscan.io/tx/" + data.txHash }
+          );
+        }
+        if (data.registeredAt) appendDetail(details, "登録時刻 / 登记时间", formatJst(data.registeredAt));
+        if (data.artifactType) appendDetail(details, "タイプ / 登记类型", data.artifactType);
+        result.append(heading, copy, details);
+      }
+
+      function clearRegistrationResult() {
+        result.hidden = true;
+        result.className = "register-result";
+        result.replaceChildren();
+      }
+
+      function delay(milliseconds) {
+        return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+      }
+
+      async function ensureSepolia(provider) {
+        let currentChainId = await provider.request({ method: "eth_chainId" });
+        if (String(currentChainId).toLowerCase() === CHAIN_HEX) return;
+
+        try {
+          await provider.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: CHAIN_HEX }]
+          });
+        } catch (error) {
+          if (Number(error && error.code) !== 4902) throw error;
+          await provider.request({
+            method: "wallet_addEthereumChain",
+            params: [{
+              chainId: CHAIN_HEX,
+              chainName: "Sepolia",
+              nativeCurrency: { name: "SepoliaETH", symbol: "ETH", decimals: 18 },
+              rpcUrls: [CONFIG.rpcUrl],
+              blockExplorerUrls: ["https://sepolia.etherscan.io"]
+            }]
+          });
+        }
+
+        currentChainId = await provider.request({ method: "eth_chainId" });
+        if (String(currentChainId).toLowerCase() !== CHAIN_HEX) {
+          throw new Error("Sepolia network was not selected");
+        }
+      }
+
+      async function waitForReceipt(provider, txHash) {
+        const deadline = Date.now() + CONFIG.confirmationTimeoutMs;
+        while (Date.now() < deadline) {
+          const receipt = await provider.request({
+            method: "eth_getTransactionReceipt",
+            params: [txHash]
+          });
+          if (receipt) return receipt;
+          await delay(2500);
+        }
+        return null;
+      }
+
+      function validateRegistrationInput() {
+        const file = registerFileInput.files && registerFileInput.files[0];
+        const artifactType = artifactInput.value.trim();
+        if (!file) {
+          setRegistrationStatus("先に登録するファイルを選択してください。/ 请先选择要登记的文件。", "is-error");
+          return null;
+        }
+        if (!isAllowedFile(file)) {
+          setRegistrationStatus("PDF または画像ファイルのみ登録できます。/ 仅可登记 PDF 或图片文件。", "is-error");
+          return null;
+        }
+        if (file.size === 0 || file.size > CONFIG.maxFileBytes) {
+          setRegistrationStatus("ファイルは 1 byte 以上、25 MB 以下にしてください。/ 文件须大于 1 byte 且不超过 25 MB。", "is-error");
+          return null;
+        }
+        if (!artifactType) {
+          setRegistrationStatus("登録タイプを入力してください。/ 请输入登记类型。", "is-error");
+          return null;
+        }
+        if (!globalThis.crypto || !globalThis.crypto.subtle) {
+          setRegistrationStatus("このブラウザでは Web Crypto API を利用できません。HTTPS の対応ブラウザで開いてください。/ 当前浏览器无法使用 Web Crypto API，请使用支持 HTTPS 的浏览器。", "is-error");
+          return null;
+        }
+        return { file, artifactType };
+      }
+
+      function registrationErrorMessage(error) {
+        if (Number(error && error.code) === 4001) {
+          return "MetaMask の要求がキャンセルされました。取引は送信されていません。/ 已取消 MetaMask 请求，交易未发送。";
+        }
+        const message = String((error && error.message) || "").toLowerCase();
+        if (message.includes("insufficient funds")) {
+          return "SepoliaETH が不足しています。テスト ETH を追加してから再試行してください。/ Sepolia 测试 ETH 不足，请补充后重试。";
+        }
+        if (message.includes("proof already registered")) {
+          return "このファイルはすでに登録されています。新しい取引は不要です。/ 此文件已登记，无需发送新交易。";
+        }
+        if (message.includes("sepolia network")) {
+          return "MetaMask で Sepolia に切り替えられませんでした。ネットワーク設定を確認してください。/ 无法切换到 Sepolia，请检查 MetaMask 网络设置。";
+        }
+        return "MetaMask を使った登録に失敗しました。ウォレットの状態とネットワークを確認して再試行してください。/ MetaMask 登记失败，请检查钱包状态和网络后重试。";
+      }
+
+      async function registerSelectedFile() {
+        const input = validateRegistrationInput();
+        if (!input) return;
+
+        clearRegistrationResult();
+        registerButton.disabled = true;
+        registerButton.textContent = "SHA-256 を計算中… / 正在计算 SHA-256…";
+        setRegistrationStatus("ファイルはブラウザ内で処理されています。/ 文件正在浏览器本地处理。", "is-loading");
+
+        try {
+          const fileBytes = await input.file.arrayBuffer();
+          const digest = await globalThis.crypto.subtle.digest("SHA-256", fileBytes);
+          const hash = hashToHex(digest);
+
+          registerButton.textContent = "登録状態を照会中… / 正在查询登记状态…";
+          const registrationData = await rpcEthCall(
+            encodeBytes32Call(CONFIG.isRegisteredSelector, hash),
+            31
+          );
+          const alreadyRegistered = BigInt(registrationData) !== 0n;
+          if (alreadyRegistered) {
+            const proofData = await rpcEthCall(
+              encodeBytes32Call(CONFIG.getProofSelector, hash),
+              32
+            );
+            const proof = decodeProof(proofData);
+            renderRegistrationResult({
+              state: "existing",
+              fileName: input.file.name,
+              hash,
+              account: proof.issuer,
+              registeredAt: proof.registeredAt,
+              artifactType: proof.artifactType
+            });
+            setRegistrationStatus("このファイルはすでに登録済みです。新しい MetaMask 取引は行いません。/ 此文件已登记，不会发起新的 MetaMask 交易。", "is-success");
+            return;
+          }
+
+          const provider = window.ethereum;
+          if (!provider || typeof provider.request !== "function") {
+            throw new Error("MetaMask provider unavailable");
+          }
+
+          registerButton.textContent = "MetaMask に接続中… / 正在连接 MetaMask…";
+          setRegistrationStatus("MetaMask でアカウントと Sepolia の確認を行います。/ 正在通过 MetaMask 确认账户和 Sepolia 网络。", "is-loading");
+          const accounts = await provider.request({ method: "eth_requestAccounts" });
+          if (!Array.isArray(accounts) || !accounts[0]) throw new Error("No wallet account selected");
+          const account = accounts[0];
+          await ensureSepolia(provider);
+
+          const transactionData = encodeRegisterProofCall(hash, input.artifactType);
+          registerButton.textContent = "MetaMask で確認してください… / 请在 MetaMask 中确认…";
+          setRegistrationStatus("表示される内容（Sepolia・合約・Gas）を確認し、納得した場合のみ承認してください。/ 请核对 MetaMask 中的 Sepolia、合约和 Gas；确认无误后再批准。", "is-loading");
+          const txHash = await provider.request({
+            method: "eth_sendTransaction",
+            params: [{
+              from: account,
+              to: CONFIG.contractAddress,
+              data: transactionData
+            }]
+          });
+          if (typeof txHash !== "string" || !txHash.startsWith("0x")) {
+            throw new Error("Transaction hash missing");
+          }
+
+          renderRegistrationResult({
+            state: "pending",
+            fileName: input.file.name,
+            hash,
+            account,
+            txHash,
+            artifactType: input.artifactType
+          });
+          registerButton.textContent = "Sepolia の確認待ち… / 等待 Sepolia 确认…";
+          setRegistrationStatus("取引を送信しました。Sepolia のブロック確認を待っています。/ 交易已发送，正在等待 Sepolia 区块确认。", "is-loading");
+          const receipt = await waitForReceipt(provider, txHash);
+          if (!receipt) {
+            setRegistrationStatus("取引は送信済みですが、まだ確認待ちです。Etherscan で状態を確認してください。/ 交易已发送但仍待确认，请在 Etherscan 查看状态。", "is-loading");
+            return;
+          }
+          if (receipt.status && BigInt(receipt.status) !== 1n) {
+            throw new Error("Transaction failed");
+          }
+
+          const proofData = await rpcEthCall(
+            encodeBytes32Call(CONFIG.getProofSelector, hash),
+            33
+          );
+          const proof = decodeProof(proofData);
+          renderRegistrationResult({
+            state: "registered",
+            fileName: input.file.name,
+            hash,
+            account: proof.issuer || account,
+            txHash,
+            registeredAt: proof.registeredAt,
+            artifactType: proof.artifactType
+          });
+          setRegistrationStatus("オンチェーン登録が確認されました。/ 已确认链上登记。", "is-success");
+        } catch (error) {
+          setRegistrationStatus(registrationErrorMessage(error), "is-error");
+        } finally {
+          registerButton.disabled = false;
+          registerButton.textContent = defaultButtonLabel;
+        }
+      }
+
+      registerFileInput.addEventListener("change", () => {
+        clearRegistrationResult();
+        const file = registerFileInput.files && registerFileInput.files[0];
+        selectedFile.textContent = file
+          ? file.name + " (" + formatFileSize(file.size) + ")"
+          : "ファイル未選択 / 尚未选择文件";
+        setRegistrationStatus(
+          file
+            ? "登録を押す前に、公開される登録タイプを確認してください。/ 点击登记前，请确认将公开保存的登记类型。"
+            : "ファイルを選択後、MetaMask を使って登録できます。/ 选择文件后，即可通过 MetaMask 登记。"
+        );
+      });
+
+      registerButton.addEventListener("click", registerSelectedFile);
     })();
   </script>
 </body>
